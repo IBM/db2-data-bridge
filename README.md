@@ -6,16 +6,16 @@ Welcome, you made the first step to access any JDBC data source from the Db2 for
 
 The idea of this project is to provide an easy and extensible way to access JDBC data source within Db2 for z/OS, so that those data sources can be combined with data in Db2 for z/OS. The main component to achieve this is a new stored procedure. It establishes the link between the JDBC data source and Db2 for z/OS. After the stored procedure is called, the data of the foreign data source can be accessed in Db2 for z/OS via a temporary table. 
 
-## How to install the data bridge stored procedure
+# How to install the data bridge stored procedure
 
-### Prerequisites
+## Prerequisites
 
 The project is written in a way that only minimal prerequisites are needed.
 
 * Java 11 or above 
 * Db2 for z/OS needs to be configured to support Java stored procedure. See [setting up WLM environment for java routines](https://www.ibm.com/docs/en/db2-for-zos/12?topic=functions-setting-up-environment-java-routines)
 
-### Compile the code 
+## Compile the code 
 
 First, we need to compile the code. This can be done through the following command in the `src` directory. 
 
@@ -23,15 +23,15 @@ First, we need to compile the code. This can be done through the following comma
 javac com/ibm/databridge/*
 ```
 
-Next, we need to create a jar file that contains the compiled code. The following command will do the trick.
+Afer the compliation we can build the jar file. The jar file will contain everything we need for the intallation of the of data bridge stored procedure. The following command will do the trick. 
 
 ```
 jar cf db2-data-bridge.jar com/ibm/databridge/*.class
 ```
 
-### Install the JAR file in Db2 for z/OS
+## Install the JAR file in Db2 for z/OS
 
-Use the SQLJ.DB2_INSTALL_JAR stored procedure, which is shipped with Db2 for z/OS to install the jar in Db2 for z/OS. 
+To make the jar file accessible for the stored procedure, we need to upload and register it in Db2 for z/OS. Use the SQLJ.DB2_INSTALL_JAR stored procedure to accomplish this task (the stored procedure is shipped with DB2 for z/OS). 
 
 ```
 CALL SQLJ.DB2_INSTALL_JAR(<jar-file-blob>, <jar-name>, 0)
@@ -41,10 +41,10 @@ For more details how to use the stored procedure see [SQLJ.DB2_INSTALL_JAR](http
 
 | Parameter | Description |
 | ----------- | ----------- |
-| <jar-file-blob> | the jar file content |
-| <jar-name> | can be selected freely, but need to be consistent with the next step |
+| jar-file-blob | the jar file content |
+| jar-name | can be selected freely, but need to be consistent with the next step |
 
-### Create the Db2 data bridge stored procedure in Db2 for z/OS
+## Create the Db2 data bridge stored procedure in Db2 for z/OS
 
 After the jar file is known to Db2 for z/OS, we need to define the data bridge stored procedure. Use the following DDL for this. 
 
@@ -72,9 +72,9 @@ CREATE PROCEDURE <schema>.DATA_BRIDGE(propertiesFilename VARCHAR(1024), query CL
 | security-level | define under which external security the stored procedure should run |
 
 
-## How to use the data bridge stored procedure
+# How to use the data bridge stored procedure
 
-### Add JDBC driver to the classpath
+## Add JDBC driver to the classpath
 
 To access a JDBC data source, the data bridge stored procedure needs access to the corresponding JDBC driver. Download the JDBC of the database system you want to connect to and add it to classpath of the Java WLM environment. See [runtime environment for Java stored procedures](https://www.ibm.com/docs/en/db2-for-zos/12?topic=routines-runtime-environment-java). You can also add multiple, if you want to connect to different data sources. 
 
@@ -84,7 +84,7 @@ To access a JDBC data source, the data bridge stored procedure needs access to t
 CLASSPATH=/u/<username>/presto/presto-jdbc-0.286.jar:/u/<username>/java/postgresql-42.7.3.jar
 ```
 
-### Setup the configuration for the call of the data gate stored procedure
+## Setup the configuration for the call of the data gate stored procedure
 
 Next, we need to create a properties file, which is handed over on the first parameter of the data bridge stored procedure call. It defines the connection to the JDBC data source, as well as some additional configuration settings for the stored procedure. The following properties can be set in that file:
 
@@ -128,7 +128,7 @@ user=<username>
 password=<password>
 ```
 
-### Run the stored procedure to access any JDBC data source
+## Run the stored procedure to access any JDBC data source
 
 You made it here, congratulations! Everything is now setup and ready to run. The last step is to call the data bridge stored procedure. This can be done from any program that is capable to call a stored procedure. 
 
@@ -146,7 +146,7 @@ pstmt.execute();
 
 After the stored procedure is called, you can access the data either direct via the stored procedure result set or via the temporary table name SESSION.<tableName> (for the above example <tableName> is "DATABRIDGE"). The temporary table name can be used to join the table with other tables in Db2 for z/OS in a subsequent SQL statement. Remember to turn off any auto-commit in this case, as declared temporary tables only exists within the commit scope.  
 
-#### Restrictions 
+### Restrictions 
 
 * The source table cannot be bigger than the maximum table size in Db2 for z/OS. See [Db2 for z/OS limits](https://www.ibm.com/docs/en/db2-for-zos/12?topic=sql-limits-in-db2-zos).
 * Some data types are not supported (See SQLStatementBuilder.java). 
@@ -154,13 +154,13 @@ After the stored procedure is called, you can access the data either direct via 
 * Not for all data types a 1:1 mapping exists. In those cases, modify the query to map it to a Db2 for z/OS supported data type, or use the built-in truncate method. 
 * Table and column names are only allowed to contain quotes or semicolon. In addition Db2 for z/OS table and column restrictions apply. 
 
-### How to diagnose issues
+## How to diagnose issues
 
 Use the LOG_OUTPUT parameter of the stored procedure to diagnose any issues. It will show an exception in case of issues. Analyze the exception to get to the root cause. 
 * For Db2 for z/OS issues check the SQLCODE (See [Db2 for z/OS SQLCODES](https://www.ibm.com/docs/en/db2-for-zos/12?topic=codes-sql)). 
 * For JDBC data source issues, check the documentation of the corresponding product.
  
-## Epilog
+# Epilog
 
 Have fun with the access to the JDBC data sources and do something creative with it!
 
