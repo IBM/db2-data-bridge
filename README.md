@@ -12,7 +12,7 @@ The idea of this project is to provide an easy and extensible way to access JDBC
 
 The project is written in a way that only minimal prerequisites are needed.
 
-* Java 11 or above 
+* Java 11 or above. 
 * Db2 for z/OS needs to be configured to support Java stored procedure. See [setting up WLM environment for java routines](https://www.ibm.com/docs/en/db2-for-zos/12?topic=functions-setting-up-environment-java-routines)
 
 ## Compile the code 
